@@ -6,9 +6,30 @@ workspace ("Croissant")
 project ("Croissant-Renderer")
     kind ("ConsoleApp")
     language ("C++")
-    targetdir ("bin/%{cfg.buildcfg}")
 
-    files { "**.h", "**.cpp" }
+    local out_dir = "../bin"
+    local obj_dir = "../bin/intermediate"
+    local src_dir = "../Sources"
+
+    targetdir (out_dir)
+    objdir (obj_dir)
+
+    -- GLFW
+    includedirs { src_dir.."/External/GLFW/include" }
+    libdirs { src_dir.."/External/GLFW/lib" }
+    links { "glfw3" }
+
+    filter { "system:macosx" }
+        links {
+            "Cocoa.framework",
+            "IOKit.framework",
+        }
+
+    -- Main source
+    files {
+        src_dir.."/*.h",
+        src_dir.."/*.cpp"
+    }
 
     filter { "configurations:Debug" }
         defines { "DEBUG" }

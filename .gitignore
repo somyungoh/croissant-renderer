@@ -1,0 +1,16 @@
+# macosx specific files
+*.dSYM
+.DS_Store
+
+# projects
+Projects
+Makefile
+*.make
+
+# binary
+bin
+premake5
+*.a
+*.so
+*.o
+*.dylib

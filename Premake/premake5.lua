@@ -23,6 +23,7 @@ project ("Croissant-Renderer")
         links {
             "Cocoa.framework",
             "IOKit.framework",
+            "OpenGL.framework",
         }
 
     -- Main source
@@ -30,6 +31,10 @@ project ("Croissant-Renderer")
         src_dir.."/*.h",
         src_dir.."/*.cpp"
     }
+
+    -- macOS
+    filter { "system:macosx" }
+        defines { "GL_SILENCE_DEPRECATION" }
 
     filter { "configurations:Debug" }
         defines { "DEBUG" }

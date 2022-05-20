@@ -1,7 +1,9 @@
 # Croissant Renderer Roadmap
 
 ## v0. A Minimum Raytracer
-- [ ] Implicit Shapes, Triagles, Point / Area Light, Soft Shadows
+- [ ] Implicit Shapes, Triagles, Point / Area Light, Soft Shadows (One-Weekend)
+- [ ] Camera Effect, Noise (Next-Weekend)
+- [ ] Path Tracing (Rest of your life)
 - [ ] OBJ Loader
 
 ## v1. First Croissant Renderer

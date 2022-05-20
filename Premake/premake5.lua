@@ -1,4 +1,20 @@
 -- premake5.lua
+
+-------------------------------------------------------
+--  Global Definition
+-------------------------------------------------------
+
+_SRC_DIR = _PREMAKE_DIR.."/../Sources"
+_OUT_DIR = _PREMAKE_DIR.."/../bin"
+_OBJ_DIR = _PREMAKE_DIR.."/../bin/intermediate"
+
+dofile ("external.lua")
+
+
+-------------------------------------------------------
+--  Croissant Workspace
+-------------------------------------------------------
+
 workspace ("Croissant")
     configurations { "Debug", "Release" }
     location ("../Projects/".._TARGET_OS)
@@ -7,17 +23,12 @@ project ("Croissant-Renderer")
     kind ("ConsoleApp")
     language ("C++")
 
-    local out_dir = "../bin"
-    local obj_dir = "../bin/intermediate"
-    local src_dir = "../Sources"
-
-    targetdir (out_dir)
-    objdir (obj_dir)
+    targetdir (_OUT_DIR)
+    objdir (_OBJ_DIR)
 
     -- GLFW
-    includedirs { src_dir.."/External/GLFW/include" }
-    libdirs { src_dir.."/External/GLFW/lib" }
-    links { "glfw3" }
+    includeGLFW()
+    linkGLFW()
 
     filter { "system:macosx" }
         links {
@@ -28,8 +39,8 @@ project ("Croissant-Renderer")
 
     -- Main source
     files {
-        src_dir.."/*.h",
-        src_dir.."/*.cpp"
+        _SRC_DIR.."/*.h",
+        _SRC_DIR.."/*.cpp"
     }
 
     -- macOS

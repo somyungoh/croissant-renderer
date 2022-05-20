@@ -1,9 +1,47 @@
-#include "glfw3.h"
+#include "GLFW/glfw3.h"
+
+#include "ray.h"
+#include "sphere.h"
+#include "camera.h"
 
 #include <iostream>
 
 const int render_w = 800;
 const int render_h = 600;
+float *pixmap = new float[render_w * render_h * 3];
+
+//----------------------------------------------------
+
+void render()
+{
+    // Camera
+    float           aspectRatio = (float)render_w / render_h;
+    cr::CCamera     camera = cr::CCamera(glm::vec3(0, 0, -1), glm::vec3(0, 1, 0), glm::vec3(0, 0, 1), aspectRatio);
+
+    // Sphere
+    cr::CSphere     sphere = cr::CSphere(glm::vec3(0, 0, 0), 0.1);
+
+    for (size_t w = 0; w < render_w; w++) {
+        for (size_t h = 0; h < render_h; h++) {
+            float   u = (float)w / (render_w - 1);
+            float   v = (float)h / (render_h - 1);
+
+            cr::CRay    ray = camera.GetRay(u, v);
+
+            glm::vec3 color(0);
+            if (sphere.Intersection(ray))
+                color.r = 1.0;
+            else
+                color.b = 1.0;
+
+            pixmap[(h * render_w + w) * 3 + 0] = color.r;
+            pixmap[(h * render_w + w) * 3 + 1] = color.g;
+            pixmap[(h * render_w + w) * 3 + 2] = color.b;
+        }
+    }
+}
+
+//----------------------------------------------------
 
 int main(void)
 {
@@ -25,9 +63,7 @@ int main(void)
 
     glfwMakeContextCurrent(window);
 
-    float *pixmap = new float[render_w * render_h * 3];
-    for (size_t i = 0; i < render_w * render_h * 3; i++)
-        pixmap[i] = 1.0;
+    render();
 
     while (!glfwWindowShouldClose(window))
     {

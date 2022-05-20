@@ -27,7 +27,7 @@ project ("Croissant-Renderer")
     objdir (_OBJ_DIR)
 
     -- GLFW
-    includeGLFW()
+    includeExternal()
     linkGLFW()
 
     filter { "system:macosx" }

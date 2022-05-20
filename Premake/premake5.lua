@@ -30,13 +30,6 @@ project ("Croissant-Renderer")
     includeExternal()
     linkGLFW()
 
-    filter { "system:macosx" }
-        links {
-            "Cocoa.framework",
-            "IOKit.framework",
-            "OpenGL.framework",
-        }
-
     -- Main source
     files {
         _SRC_DIR.."/*.h",
@@ -46,6 +39,11 @@ project ("Croissant-Renderer")
     -- macOS
     filter { "system:macosx" }
         defines { "GL_SILENCE_DEPRECATION" }
+        links {
+            "Cocoa.framework",
+            "IOKit.framework",
+            "OpenGL.framework",
+        }
 
     filter { "configurations:Debug" }
         defines { "DEBUG" }
@@ -54,3 +52,7 @@ project ("Croissant-Renderer")
     filter { "configurations:Release" }
         defines { "NDEBUG" }
         optimize ("On")
+
+    filter {}
+
+    cppdialect "c++17"

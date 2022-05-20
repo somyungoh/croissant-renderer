@@ -1,7 +1,7 @@
 #include "GLFW/glfw3.h"
 
 #include "ray.h"
-#include "sphere.h"
+#include "hittable.h"
 #include "camera.h"
 
 #include <iostream>
@@ -27,13 +27,15 @@ void render()
             float   v = (float)h / (render_h - 1);
 
             cr::CRay    ray = camera.GetRay(u, v);
+            cr::SHitRec rec;
 
-            glm::vec3 color(0);
-            if (sphere.Intersection(ray))
+            glm::vec3 color(u, v, (u + v) * 0.5f);
+            if (sphere.Hit(ray, rec))
+            {
                 color.r = 1.0;
-            else
-                color.b = 1.0;
-
+                color.g = 0.0;
+                color.b = 0.0;
+            }
             pixmap[(h * render_w + w) * 3 + 0] = color.r;
             pixmap[(h * render_w + w) * 3 + 1] = color.g;
             pixmap[(h * render_w + w) * 3 + 2] = color.b;

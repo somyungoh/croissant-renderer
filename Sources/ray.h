@@ -14,6 +14,8 @@ public:
     {
     }
 
+    glm::vec3   At(float t) const { return m_origin + m_dir * t; }
+
 public:
     glm::vec3   m_origin;
     glm::vec3   m_dir;

@@ -3,7 +3,6 @@
 #include "cr_include.h"
 #include "ray.h"
 
-#include <cstdio>
 _CR_NAMESPACE_BEGIN
 //----------------------------------------------------
 

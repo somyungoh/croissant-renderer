@@ -12,7 +12,7 @@ CSphere::CSphere(const glm::vec3 &origin, float radius)
 
 //----------------------------------------------------
 
-bool    CSphere::Hit (const CRay &ray, SHitRec &hitRec) const
+bool    CSphere::Hit(const CRay &ray, SHitRec &hitRec) const
 {
     glm::vec3   oc = ray.m_origin - m_origin;
     float       b = glm::dot(oc, ray.m_dir);

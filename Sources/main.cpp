@@ -8,6 +8,11 @@
 
 const int render_w = 800;
 const int render_h = 600;
+
+const int nSamples = 4;
+const int nSamplesW = glm::sqrt(nSamples);
+const float nSamplesOffset = 1.f / nSamples;
+
 float *pixmap = new float[render_w * render_h * 3];
 
 //----------------------------------------------------
@@ -23,6 +28,27 @@ void render()
 
     for (size_t w = 0; w < render_w; w++) {
         for (size_t h = 0; h < render_h; h++) {
+#if 1
+            for (size_t s = 0; s < nSamples; s++) {
+                int si = s % nSamplesW;
+                int sj = s / nSamplesW;
+                float   u = (w + (float)si / nSamplesW + nSamplesOffset) / (render_w - 1);
+                float   v = (h + (float)sj / nSamplesW + nSamplesOffset) / (render_h - 1);
+                cr::CRay    ray = camera.GetRay(u, v);
+                cr::SHitRec rec;
+
+                glm::vec3 color(u, v, (u + v) * 0.5f);
+                if (sphere.Hit(ray, rec))
+                {
+                    color.r = rec.n.r + 1.0;
+                    color.g = rec.n.g + 1.0;
+                    color.b = rec.n.b + 1.0;
+                }
+                pixmap[(h * render_w + w) * 3 + 0] += color.r / nSamples;
+                pixmap[(h * render_w + w) * 3 + 1] += color.g / nSamples;
+                pixmap[(h * render_w + w) * 3 + 2] += color.b / nSamples;
+            }
+#else
             float   u = (float)w / (render_w - 1);
             float   v = (float)h / (render_h - 1);
 
@@ -32,13 +58,14 @@ void render()
             glm::vec3 color(u, v, (u + v) * 0.5f);
             if (sphere.Hit(ray, rec))
             {
-                color.r = 1.0;
-                color.g = 0.0;
-                color.b = 0.0;
+                color.r = rec.n.r + 1.0;
+                color.g = rec.n.g + 1.0;
+                color.b = rec.n.b + 1.0;
             }
             pixmap[(h * render_w + w) * 3 + 0] = color.r;
             pixmap[(h * render_w + w) * 3 + 1] = color.g;
             pixmap[(h * render_w + w) * 3 + 2] = color.b;
+#endif
         }
     }
 }

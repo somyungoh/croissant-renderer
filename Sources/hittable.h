@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cr_include.h"
+#include "common.h"
 #include "ray.h"
 
 _CR_NAMESPACE_BEGIN

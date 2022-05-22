@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cr_include.h"
+#include "common.h"
 #include "ray.h"
 
 _CR_NAMESPACE_BEGIN
@@ -23,7 +23,7 @@ public:
     const CRay GetRay(float u, float v)
     {
         // TODO: check u,v out of range?
-        return CRay(m_origin, glm::normalize(m_lowerLeftCorner + u * m_right + v * m_up / m_aspectRatio - m_origin));
+        return CRay(m_origin, m_lowerLeftCorner + u * m_right + v * m_up / m_aspectRatio - m_origin);
     }
 
 public:

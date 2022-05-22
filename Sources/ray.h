@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cr_include.h"
+#include "common.h"
 
 _CR_NAMESPACE_BEGIN
 //----------------------------------------------------
@@ -10,7 +10,7 @@ class CRay
 public:
     CRay(const glm::vec3 &origin, const glm::vec3 &dir)
     : m_origin(origin)
-    , m_dir(dir)
+    , m_dir(glm::normalize(dir))
     {
     }
 

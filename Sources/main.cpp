@@ -31,7 +31,7 @@ glm::vec3 raycast(const cr::CRay &ray, const cr::CHittableList &world, int depth
     cr::SHitRec     hitRec;
     if (world.Hit(ray, 0.00001f, infinity, hitRec))
     {
-        cr::CRay    diffuseRay = cr::CRay(hitRec.p, hitRec.n + glm::vec3(glm::ballRand(1.0)));
+        cr::CRay    diffuseRay = cr::CRay(hitRec.p, hitRec.n + glm::vec3(glm::sphericalRand(1.0)));
         return 0.5f * raycast(diffuseRay, world, depth - 1);
     }
 

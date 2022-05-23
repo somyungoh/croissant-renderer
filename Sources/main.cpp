@@ -6,6 +6,7 @@
 #include "camera.h"
 
 #include <iostream>
+#include <chrono>
 
 const int render_w = 800;
 const int render_h = 600;
@@ -28,7 +29,7 @@ glm::vec3 raycast(const cr::CRay &ray, const cr::CHittableList &world, int depth
     }
 
     cr::SHitRec     hitRec;
-    if (world.Hit(ray, 0, infinity, hitRec))
+    if (world.Hit(ray, 0.00001f, infinity, hitRec))
     {
         cr::CRay    diffuseRay = cr::CRay(hitRec.p, hitRec.n + glm::vec3(glm::ballRand(1.0)));
         return 0.5f * raycast(diffuseRay, world, depth - 1);
@@ -43,6 +44,10 @@ glm::vec3 raycast(const cr::CRay &ray, const cr::CHittableList &world, int depth
 
 void render()
 {
+    printf("Start rendering... ");
+    fflush(stdout);
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
     // Camera
     float           aspectRatio = (float)render_w / render_h;
     cr::CCamera     camera = cr::CCamera(glm::vec3(0, 0, -1), glm::vec3(0, 1, 0), glm::vec3(0, 0, 1), aspectRatio);
@@ -84,7 +89,7 @@ void render()
             cr::SHitRec rec;
 
             glm::vec3 color(u, v, (u + v) * 0.5f);
-            if (sphere.Hit(ray, 0, infinity, rec))
+            if (sphere.Hit(ray, 0.0001, infinity, rec))
             {
                 color.r = rec.n.r + 1.0;
                 color.g = rec.n.g + 1.0;
@@ -96,6 +101,12 @@ void render()
 #endif
         }
     }
+
+    // elapsed time
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+    printf("Done.\n");
+    printf("Elpased: %.3fs.\n", elapsed / 360.f);
 }
 
 //----------------------------------------------------
@@ -103,8 +114,6 @@ void render()
 int main(void)
 {
     GLFWwindow* window;
-
-    std::cout << "\nInitializing GLFW Context...\n";
 
     if (!glfwInit())
         return -1;

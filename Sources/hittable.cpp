@@ -12,7 +12,7 @@ CSphere::CSphere(const glm::vec3 &origin, float radius)
 
 //----------------------------------------------------
 
-bool    CSphere::Hit(const CRay &ray, SHitRec &hitRec) const
+bool    CSphere::Hit(const CRay &ray, float t_min, float t_max, SHitRec &hitRec) const
 {
     glm::vec3   oc = ray.m_origin - m_origin;
     float       b = glm::dot(oc, ray.m_dir);
@@ -22,10 +22,14 @@ bool    CSphere::Hit(const CRay &ray, SHitRec &hitRec) const
     if (h < 0.0)
         return false;
 
-    hitRec.t = -b - glm::sqrt(h);
+    // TODO: handle t for back face hit
+    hitRec.t = -b - glm::sqrt(h);   // also, -b + glm::sqrt(h)
+    if (hitRec.t < t_min || hitRec.t > t_max)
+        return false;
+
     hitRec.p = ray.At(hitRec.t);
     hitRec.n = (hitRec.p - m_origin) / m_radius;
-    hitRec.frontFace = glm::dot(hitRec.n, ray.m_dir) < 0;
+    hitRec.setFaceNormal(ray);
 
     return true;
 }

@@ -1,4 +1,5 @@
 #include "GLFW/glfw3.h"
+#include "glm/gtc/random.hpp"
 
 #include "ray.h"
 #include "hittable_list.h"
@@ -9,11 +10,34 @@
 const int render_w = 800;
 const int render_h = 600;
 
-const int nSamples = 4;
+const int nSamples = 9;
 const int nSamplesW = glm::sqrt(nSamples);
 const float nSamplesOffset = 0.5f / nSamplesW;
 
+const int max_depth = 10;
+
 float *pixmap = new float[render_w * render_h * 3];
+
+//----------------------------------------------------
+
+glm::vec3 raycast(const cr::CRay &ray, const cr::CHittableList &world, int depth)
+{
+    // max-depth reached
+    if (depth <= 0) {
+        return glm::vec3(1.0);
+    }
+
+    cr::SHitRec     hitRec;
+    if (world.Hit(ray, 0, infinity, hitRec))
+    {
+        cr::CRay    diffuseRay = cr::CRay(hitRec.p, hitRec.n + glm::vec3(glm::ballRand(1.0)));
+        return 0.5f * raycast(diffuseRay, world, depth - 1);
+    }
+
+    // coloring
+    float t = 0.5f * (ray.m_dir.y + 1.0f);
+    return glm::vec3(1.0) * (1.0f - t) + glm::vec3(0.5, 0.7, 1.0) * t;
+}
 
 //----------------------------------------------------
 
@@ -26,7 +50,7 @@ void render()
     // Scene
     cr::CHittableList   world;
     world.Add(std::make_shared<cr::CSphere>(cr::CSphere(glm::vec3(0, 0, 0), 0.1)));
-    world.Add(std::make_shared<cr::CSphere>(cr::CSphere(glm::vec3(0, -2, 0.5), 1.9)));
+    world.Add(std::make_shared<cr::CSphere>(cr::CSphere(glm::vec3(0, -2, 0.5), 1.99)));
 
     for (size_t w = 0; w < render_w; w++) {
         for (size_t h = 0; h < render_h; h++) {
@@ -38,17 +62,19 @@ void render()
                 float   u = (w + (float)si / nSamplesW + nSamplesOffset) / render_w;
                 float   v = (h + (float)sj / nSamplesW + nSamplesOffset) / render_h;
                 cr::CRay    ray = camera.GetRay(u, v);
-                cr::SHitRec rec;
 
-                glm::vec3 color;
-                if (world.Hit(ray, rec))
-                    color = rec.n + glm::vec3(1.0);
-                else
-                    color = glm::vec3(u, v, (u + v) * 0.5f);
+                glm::vec3 color = raycast(ray, world, max_depth);
 
-                pixmap[(h * render_w + w) * 3 + 0] += color.r / nSamples;
-                pixmap[(h * render_w + w) * 3 + 1] += color.g / nSamples;
-                pixmap[(h * render_w + w) * 3 + 2] += color.b / nSamples;
+                // AA correction
+                color /= nSamples;
+
+                // gamma correction
+                float scale = 1.0f / nSamples;
+                color = glm::sqrt(color * scale);
+
+                pixmap[(h * render_w + w) * 3 + 0] += color.r;
+                pixmap[(h * render_w + w) * 3 + 1] += color.g;
+                pixmap[(h * render_w + w) * 3 + 2] += color.b;
             }
 #else
             float   u = (float)w / (render_w - 1);
@@ -58,7 +84,7 @@ void render()
             cr::SHitRec rec;
 
             glm::vec3 color(u, v, (u + v) * 0.5f);
-            if (sphere.Hit(ray, rec))
+            if (sphere.Hit(ray, 0, infinity, rec))
             {
                 color.r = rec.n.r + 1.0;
                 color.g = rec.n.g + 1.0;

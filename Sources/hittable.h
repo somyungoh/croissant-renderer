@@ -12,6 +12,12 @@ struct SHitRec
     glm::vec3   n;
     float       t;
     bool        frontFace;
+
+    void        setFaceNormal(const CRay &ray)
+    {
+        frontFace = glm::dot(ray.m_dir, n) < 0;
+        n = frontFace ? n : -n;
+    }
 };
 
 //----------------------------------------------------
@@ -19,7 +25,7 @@ struct SHitRec
 class CHittable
 {
 public:
-    virtual bool    Hit(const CRay &ray, SHitRec &hitRec) const = 0;
+    virtual bool    Hit(const CRay &ray, float t_min, float t_max, SHitRec &hitRec) const = 0;
 };
 
 //----------------------------------------------------
@@ -29,7 +35,7 @@ class CSphere : public CHittable
 public:
     CSphere(const glm::vec3 &origin, float radius);
 
-    virtual bool    Hit(const CRay &ray, SHitRec &hitRec) const override;
+    virtual bool    Hit(const CRay &ray, float t_min, float t_max, SHitRec &hitRec) const override;
 
 public:
     glm::vec3   m_origin;

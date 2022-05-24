@@ -1,12 +1,12 @@
 #include "hittable.h"
 
-
 _CR_NAMESPACE_BEGIN
 //----------------------------------------------------
 
-CSphere::CSphere(const glm::vec3 &origin, float radius)
+CSphere::CSphere(const glm::vec3 &origin, float radius, const std::shared_ptr<CMaterial> &material)
 : m_origin(origin)
 , m_radius(radius)
+, m_material(material)
 {
 }
 
@@ -30,6 +30,7 @@ bool    CSphere::Hit(const CRay &ray, float t_min, float t_max, SHitRec &hitRec)
     hitRec.p = ray.At(hitRec.t);
     hitRec.n = (hitRec.p - m_origin) / m_radius;
     hitRec.setFaceNormal(ray);
+    hitRec.p_material = m_material;
 
     return true;
 }

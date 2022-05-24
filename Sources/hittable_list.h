@@ -3,7 +3,6 @@
 #include "hittable.h"
 
 #include <vector>
-#include <memory>   // shared_ptr
 
 _CR_NAMESPACE_BEGIN
 //----------------------------------------------------
@@ -25,7 +24,7 @@ bool    CHittableList::Hit(const CRay &ray, float t_min, float t_max, SHitRec &h
 {
     SHitRec hitTmp;
     bool    isHit = false;
-    float   tClosest  = infinity;
+    float   tClosest  = _INFINITY;
 
     for (const auto &obj : m_hittables) {
         if (obj->Hit(ray, 0, tClosest, hitTmp))

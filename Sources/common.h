@@ -6,7 +6,9 @@
 
 // headers
 #include "glm/glm.hpp"
+#include <memory>   // shared_ptr
 
 // constants
-const float     infinity = std::numeric_limits<float>::infinity();
+const float     _INFINITY = std::numeric_limits<float>::infinity();
+const float     _EPSILON = 1e-8;
 

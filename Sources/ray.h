@@ -8,6 +8,7 @@ _CR_NAMESPACE_BEGIN
 class CRay
 {
 public:
+    CRay() {};
     CRay(const glm::vec3 &origin, const glm::vec3 &dir)
     : m_origin(origin)
     , m_dir(glm::normalize(dir))

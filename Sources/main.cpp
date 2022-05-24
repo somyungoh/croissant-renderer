@@ -1,7 +1,7 @@
 #include "GLFW/glfw3.h"
-#include "glm/gtc/random.hpp"
 
 #include "ray.h"
+#include "material.h"
 #include "hittable_list.h"
 #include "camera.h"
 
@@ -29,14 +29,18 @@ glm::vec3 raycast(const cr::CRay &ray, const cr::CHittableList &world, int depth
     }
 
     cr::SHitRec     hitRec;
-    if (world.Hit(ray, 0.00001f, infinity, hitRec))
+    if (world.Hit(ray, 0.00001f, _INFINITY, hitRec))
     {
-        cr::CRay    diffuseRay = cr::CRay(hitRec.p, hitRec.n + glm::vec3(glm::sphericalRand(1.0)));
-        return 0.5f * raycast(diffuseRay, world, depth - 1);
+        // bounced rays
+        cr::CRay    scatteredRay;
+        glm::vec3   attenuation;
+        if (hitRec.p_material->Scatter(ray, hitRec, attenuation, scatteredRay))
+            return 0.5f * raycast(scatteredRay, world, depth - 1);
+        return glm::vec3(0);
     }
 
     // coloring
-    float t = 0.5f * (ray.m_dir.y + 1.0f);
+    float   t = 0.5f * (ray.m_dir.y + 1.0f);
     return glm::vec3(1.0) * (1.0f - t) + glm::vec3(0.5, 0.7, 1.0) * t;
 }
 
@@ -53,9 +57,12 @@ void render()
     cr::CCamera     camera = cr::CCamera(glm::vec3(0, 0, -1), glm::vec3(0, 1, 0), glm::vec3(0, 0, 1), aspectRatio);
 
     // Scene
+    std::shared_ptr<cr::CMaterial> mat_green = std::make_shared<cr::CLambertian>(glm::vec3(0, 1, 0));
+    std::shared_ptr<cr::CMaterial> mat_blue = std::make_shared<cr::CLambertian>(glm::vec3(0, 0, 1));
+
     cr::CHittableList   world;
-    world.Add(std::make_shared<cr::CSphere>(cr::CSphere(glm::vec3(0, 0, 0), 0.1)));
-    world.Add(std::make_shared<cr::CSphere>(cr::CSphere(glm::vec3(0, -2, 0.5), 1.99)));
+    world.Add(std::make_shared<cr::CSphere>(cr::CSphere(glm::vec3(0, 0, 0), 0.1, mat_blue)));
+    world.Add(std::make_shared<cr::CSphere>(cr::CSphere(glm::vec3(0, -2, 0.5), 1.99, mat_green)));
 
     for (size_t w = 0; w < render_w; w++) {
         for (size_t h = 0; h < render_h; h++) {
@@ -89,7 +96,7 @@ void render()
             cr::SHitRec rec;
 
             glm::vec3 color(u, v, (u + v) * 0.5f);
-            if (sphere.Hit(ray, 0.0001, infinity, rec))
+            if (sphere.Hit(ray, 0.0001, _INFINITY, rec))
             {
                 color.r = rec.n.r + 1.0;
                 color.g = rec.n.g + 1.0;

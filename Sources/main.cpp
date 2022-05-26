@@ -1,4 +1,6 @@
 #include "GLFW/glfw3.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb/stb_image_write.h"
 
 #include "ray.h"
 #include "material.h"
@@ -107,6 +109,34 @@ void render()
 
 //----------------------------------------------------
 
+void saveJpeg()
+{
+    const char* filename = "MyRender.jpg";
+
+    // remap pixmap to 8 bits
+    unsigned char pixmap8bits[render_w * render_h * 3];
+    for (size_t i = 0; i < render_w * render_h * 3; ++i)
+        pixmap8bits[i] = pixmap[i] * 255.f;
+
+    stbi_flip_vertically_on_write(true);
+    int success = stbi_write_jpg(filename, render_w, render_h, 3, pixmap8bits, 100);
+
+    if (success)
+        std::cout << "Image saved: " << filename << std::endl;
+    else
+        std::cout << "Error while saving image: " << filename << std::endl;
+}
+
+//----------------------------------------------------
+
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_S && action == GLFW_PRESS)
+        saveJpeg();
+}
+
+//----------------------------------------------------
+
 int main(void)
 {
     GLFWwindow* window;
@@ -123,6 +153,7 @@ int main(void)
         return -1;
     }
 
+    glfwSetKeyCallback(window, keyCallback);
     glfwMakeContextCurrent(window);
 
     render();

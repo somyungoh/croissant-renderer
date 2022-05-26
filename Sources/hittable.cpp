@@ -22,8 +22,9 @@ bool    CSphere::Hit(const CRay &ray, float t_min, float t_max, SHitRec &hitRec)
     if (h < 0.0)
         return false;
 
-    // TODO: handle t for back face hit
-    hitRec.t = -b - glm::sqrt(h);   // also, -b + glm::sqrt(h)
+    hitRec.t = -b - glm::sqrt(h);
+    if (hitRec.t < t_min)
+        hitRec.t = -b + glm::sqrt(h);
     if (hitRec.t < t_min || hitRec.t > t_max)
         return false;
 

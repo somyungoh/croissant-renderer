@@ -27,7 +27,7 @@ bool    CHittableList::Hit(const CRay &ray, float t_min, float t_max, SHitRec &h
     float   tClosest  = _INFINITY;
 
     for (const auto &obj : m_hittables) {
-        if (obj->Hit(ray, 0, tClosest, hitTmp))
+        if (obj->Hit(ray, t_min, tClosest, hitTmp))
         {
             hitRec = hitTmp;
             tClosest = hitTmp.t;

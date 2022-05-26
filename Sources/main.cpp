@@ -11,7 +11,7 @@
 const int render_w = 800;
 const int render_h = 600;
 
-const int nSamples = 9;
+const int nSamples = 255;
 const int nSamplesW = glm::sqrt(nSamples);
 const float nSamplesOffset = 0.5f / nSamplesW;
 
@@ -25,7 +25,7 @@ glm::vec3 raycast(const cr::CRay &ray, const cr::CHittableList &world, int depth
 {
     // max-depth reached
     if (depth <= 0) {
-        return glm::vec3(1.0);
+        return glm::vec3(0);
     }
 
     cr::SHitRec     hitRec;
@@ -35,7 +35,7 @@ glm::vec3 raycast(const cr::CRay &ray, const cr::CHittableList &world, int depth
         cr::CRay    scatteredRay;
         glm::vec3   attenuation;
         if (hitRec.p_material->Scatter(ray, hitRec, attenuation, scatteredRay))
-            return 0.5f * raycast(scatteredRay, world, depth - 1);
+            return attenuation * raycast(scatteredRay, world, depth - 1);
         return glm::vec3(0);
     }
 
@@ -57,16 +57,23 @@ void render()
     cr::CCamera     camera = cr::CCamera(glm::vec3(0, 0, -1), glm::vec3(0, 1, 0), glm::vec3(0, 0, 1), aspectRatio);
 
     // Scene
-    std::shared_ptr<cr::CMaterial> mat_green = std::make_shared<cr::CLambertian>(glm::vec3(0, 1, 0));
-    std::shared_ptr<cr::CMaterial> mat_blue = std::make_shared<cr::CLambertian>(glm::vec3(0, 0, 1));
+    std::shared_ptr<cr::CMaterial>  mat_labmbertGreen = std::make_shared<cr::CMaterialLambertian>(glm::vec3(0.15, 0.6, 0.09));
+    std::shared_ptr<cr::CMaterial>  mat_lambertWhite = std::make_shared<cr::CMaterialLambertian>(glm::vec3(1.0f));
+    std::shared_ptr<cr::CMaterial>  mat_lambertWhiteGray = std::make_shared<cr::CMaterialLambertian>(glm::vec3(0.8f));
+    std::shared_ptr<cr::CMaterial>  mat_lambertBlue = std::make_shared<cr::CMaterialLambertian>(glm::vec3(0.2, 0.18, 0.87));
+    std::shared_ptr<cr::CMaterial>  mat_metalGold = std::make_shared<cr::CMaterialMetal>(glm::vec3(0.8, 0.6, 0.2), 0);
+    std::shared_ptr<cr::CMaterial>  mat_metalBlue = std::make_shared<cr::CMaterialMetal>(glm::vec3(0.2, 0.3, 0.8), 0);
+    std::shared_ptr<cr::CMaterial>  mat_metalRose = std::make_shared<cr::CMaterialMetal>(glm::vec3(0.8, 0.3, 0.2), 0.2);
+    std::shared_ptr<cr::CMaterial>  mat_glass = std::make_shared<cr::CMaterialGlass>(1.5, 0);
 
     cr::CHittableList   world;
-    world.Add(std::make_shared<cr::CSphere>(cr::CSphere(glm::vec3(0, 0, 0), 0.1, mat_blue)));
-    world.Add(std::make_shared<cr::CSphere>(cr::CSphere(glm::vec3(0, -2, 0.5), 1.99, mat_green)));
-
+    world.Add(std::make_shared<cr::CSphere>(cr::CSphere(glm::vec3(0, 0, 0), 0.1, mat_lambertWhite)));
+    world.Add(std::make_shared<cr::CSphere>(cr::CSphere(glm::vec3(0.2, 0, 0), 0.1, mat_metalRose)));
+    world.Add(std::make_shared<cr::CSphere>(cr::CSphere(glm::vec3(-0.2, 0, 0), 0.1, mat_metalBlue)));
+    world.Add(std::make_shared<cr::CSphere>(cr::CSphere(glm::vec3(0, -5.075, 0.5), 5, mat_lambertWhiteGray)));
+    
     for (size_t w = 0; w < render_w; w++) {
         for (size_t h = 0; h < render_h; h++) {
-#if 1
             for (size_t s = 0; s < nSamples; s++)
             {
                 int     si = s % nSamplesW;
@@ -88,24 +95,6 @@ void render()
                 pixmap[(h * render_w + w) * 3 + 1] += color.g;
                 pixmap[(h * render_w + w) * 3 + 2] += color.b;
             }
-#else
-            float   u = (float)w / (render_w - 1);
-            float   v = (float)h / (render_h - 1);
-
-            cr::CRay    ray = camera.GetRay(u, v);
-            cr::SHitRec rec;
-
-            glm::vec3 color(u, v, (u + v) * 0.5f);
-            if (sphere.Hit(ray, 0.0001, _INFINITY, rec))
-            {
-                color.r = rec.n.r + 1.0;
-                color.g = rec.n.g + 1.0;
-                color.b = rec.n.b + 1.0;
-            }
-            pixmap[(h * render_w + w) * 3 + 0] = color.r;
-            pixmap[(h * render_w + w) * 3 + 1] = color.g;
-            pixmap[(h * render_w + w) * 3 + 2] = color.b;
-#endif
         }
     }
 
@@ -113,7 +102,7 @@ void render()
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
     printf("Done.\n");
-    printf("Elpased: %.3fs.\n", elapsed / 360.f);
+    printf("Elpased: %.3fs.\n", elapsed / 1000.f);
 }
 
 //----------------------------------------------------

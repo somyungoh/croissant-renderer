@@ -1,5 +1,7 @@
 # Changelog
 
+## v0.0.2
+
 ## v0.0.1
 (Released: May 26, 2022)
 - Added Ray, Camera, Hittable

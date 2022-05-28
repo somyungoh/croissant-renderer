@@ -52,11 +52,14 @@ void render()
 {
     printf("Start rendering... ");
     fflush(stdout);
-    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
+    // Timer
+    auto            begin = std::chrono::steady_clock::now();
 
     // Camera
     float           aspectRatio = (float)render_w / render_h;
-    cr::CCamera     camera = cr::CCamera(glm::vec3(0, 0, -1), glm::vec3(0, 1, 0), glm::vec3(0, 0, 1), aspectRatio);
+    cr::CCamera     camera = cr::CCamera(45.f, aspectRatio);
+    camera.LookAt(glm::vec3(0, 0, 0));
 
     // Scene
     std::shared_ptr<cr::CMaterial>  mat_labmbertGreen = std::make_shared<cr::CMaterialLambertian>(glm::vec3(0.15, 0.6, 0.09));
@@ -83,7 +86,6 @@ void render()
                 float   u = (w + (float)si / nSamplesW + nSamplesOffset) / render_w;
                 float   v = (h + (float)sj / nSamplesW + nSamplesOffset) / render_h;
                 cr::CRay    ray = camera.GetRay(u, v);
-
                 glm::vec3 color = raycast(ray, world, max_depth);
 
                 // AA correction

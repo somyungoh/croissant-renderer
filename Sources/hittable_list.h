@@ -2,20 +2,18 @@
 
 #include "hittable.h"
 
-#include <vector>
-
 _CR_NAMESPACE_BEGIN
 //----------------------------------------------------
 
-class CHittableList : public CHittable
+class CHittableList : public IHittable
 {
 public:
-    void    Add(std::shared_ptr<CHittable> object) { m_hittables.push_back(object); };
+    void    Add(std::shared_ptr<IHittable> object) { m_hittables.push_back(object); };
     void    Clear() { m_hittables.clear(); };
 
     virtual bool    Hit(const CRay &ray, float t_min, float t_max, SHitRec &hitRec) const override;
 private:
-    std::vector<std::shared_ptr<CHittable>>     m_hittables;
+    std::vector<std::shared_ptr<IHittable>>     m_hittables;
 };
 
 //----------------------------------------------------

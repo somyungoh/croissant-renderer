@@ -6,7 +6,9 @@
 
 // headers
 #include "glm/glm.hpp"
+#include <iostream>
 #include <memory>   // shared_ptr
+#include <vector>
 
 // constants
 const float     _INFINITY = std::numeric_limits<float>::infinity();

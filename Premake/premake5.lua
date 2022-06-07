@@ -19,6 +19,11 @@ workspace ("Croissant")
     configurations { "Debug", "Release" }
     location ("../Projects/".._TARGET_OS)
 
+
+-------------------------------------------------------
+--  Projects
+-------------------------------------------------------
+
 project ("Croissant-Renderer")
     kind ("ConsoleApp")
     language ("C++")

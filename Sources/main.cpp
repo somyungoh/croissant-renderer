@@ -7,13 +7,12 @@
 #include "hittable_list.h"
 #include "camera.h"
 
-#include <iostream>
 #include <chrono>
 
 const int render_w = 800;
 const int render_h = 600;
 
-const int nSamples = 255;
+const int nSamples = 16;
 const int nSamplesW = glm::sqrt(nSamples);
 const float nSamplesOffset = 0.5f / nSamplesW;
 
@@ -50,7 +49,7 @@ glm::vec3 raycast(const cr::CRay &ray, const cr::CHittableList &world, int depth
 
 void render()
 {
-    printf("Start rendering... ");
+    printf("[Render] Start rendering...\n");
     fflush(stdout);
 
     // Timer
@@ -72,11 +71,18 @@ void render()
     std::shared_ptr<cr::CMaterial>  mat_glass = std::make_shared<cr::CMaterialGlass>(1.5, 0);
 
     cr::CHittableList   world;
-    world.Add(std::make_shared<cr::CSphere>(cr::CSphere(glm::vec3(0, 0, 0), 0.1, mat_lambertWhite)));
-    world.Add(std::make_shared<cr::CSphere>(cr::CSphere(glm::vec3(0.2, 0, 0), 0.1, mat_metalRose)));
-    world.Add(std::make_shared<cr::CSphere>(cr::CSphere(glm::vec3(-0.2, 0, 0), 0.1, mat_metalBlue)));
-    world.Add(std::make_shared<cr::CSphere>(cr::CSphere(glm::vec3(0, -5.075, 0.5), 5, mat_lambertWhiteGray)));
-    
+
+#if 1   // Use Obj
+    cr::CHittableMesh   bunny(glm::vec3(0, 0, 0), mat_lambertWhite);
+    bunny.Load("bunny.obj");
+    world.Add(std::make_shared<cr::CHittableMesh>(bunny));
+#else
+    world.Add(std::make_shared<cr::CHittableSphere>(cr::CHittableSphere(glm::vec3(0, 0, 0), 0.1, mat_lambertWhite)));
+#endif
+    world.Add(std::make_shared<cr::CHittableSphere>(cr::CHittableSphere(glm::vec3(0.2, 0, 0), 0.1, mat_metalRose)));
+    world.Add(std::make_shared<cr::CHittableSphere>(cr::CHittableSphere(glm::vec3(-0.2, 0, 0), 0.1, mat_metalBlue)));
+    world.Add(std::make_shared<cr::CHittableSphere>(cr::CHittableSphere(glm::vec3(0, -5.075, 0.5), 5, mat_lambertWhiteGray)));
+
     for (size_t w = 0; w < render_w; w++) {
         for (size_t h = 0; h < render_h; h++) {
             for (size_t s = 0; s < nSamples; s++)
@@ -105,8 +111,8 @@ void render()
     // elapsed time
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-    printf("Done.\n");
-    printf("Elpased: %.3fs.\n", elapsed / 1000.f);
+    printf("[Render] Done.\n");
+    printf("[Render] Elpased: %.3fs.\n", elapsed / 1000.f);
 }
 
 //----------------------------------------------------

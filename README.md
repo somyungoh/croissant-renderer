@@ -4,8 +4,8 @@ My hobby renderer.
 
 Why **Croissant**? I started to have the idea of creating my own hobby renderer since when I was in France, so why not :p
 
-![](/Showcase/v0.0.1.jpg)  
-(Croissant v0.0.1)
+![](/Showcase/v0.0.2.jpg)  
+(Croissant v0.0.2)
 
 Click [here](./Roadmap.md) to see the Roadmap.
 Click [here](./Changelog.md) to see the Changelogs.

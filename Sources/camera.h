@@ -14,7 +14,7 @@ public:
     , m_aspectRatio(aspectRatio)
     {
         // default coordinates
-        m_origin = glm::vec3(0, 0.2, -1);
+        m_origin = glm::vec3(0, 0, 0);
         m_up = glm::vec3(0, 1, 0);
         m_forward = glm::vec3(0, 0, -1);
         m_right = glm::vec3(glm::normalize(glm::cross(m_forward, m_up)));
@@ -23,6 +23,12 @@ public:
         m_Sy = 2.0f * h;
         m_Sx = aspectRatio * m_Sy;
         m_lowerLeftCorner = m_origin - m_right * m_Sx * 0.5f - m_up * m_Sy * 0.5f - m_forward * 1.0f;   // focal dist 1.0
+    }
+
+    void        SetPos(const glm::vec3 &pos)
+    {
+        m_origin = pos;
+        m_lowerLeftCorner = m_origin - m_right * m_Sx * 0.5f - m_up * m_Sy * 0.5f - m_forward * 1.0f;
     }
 
     void        LookAt(const glm::vec3 &lookAt)

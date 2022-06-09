@@ -49,39 +49,48 @@ glm::vec3 raycast(const cr::CRay &ray, const cr::CHittableList &world, int depth
 
 void render()
 {
-    printf("[Render] Start rendering...\n");
-    fflush(stdout);
-
     // Timer
     auto            begin = std::chrono::steady_clock::now();
 
     // Camera
     float           aspectRatio = (float)render_w / render_h;
     cr::CCamera     camera = cr::CCamera(45.f, aspectRatio);
+    camera.SetPos(glm::vec3(0, 0.65, -1));
     camera.LookAt(glm::vec3(0, 0, 0));
 
     // Scene
     std::shared_ptr<cr::CMaterial>  mat_labmbertGreen = std::make_shared<cr::CMaterialLambertian>(glm::vec3(0.15, 0.6, 0.09));
     std::shared_ptr<cr::CMaterial>  mat_lambertWhite = std::make_shared<cr::CMaterialLambertian>(glm::vec3(1.0f));
+    std::shared_ptr<cr::CMaterial>  mat_lambertBrown = std::make_shared<cr::CMaterialLambertian>(glm::vec3(0.92f, 0.59f, 0.17f));
     std::shared_ptr<cr::CMaterial>  mat_lambertWhiteGray = std::make_shared<cr::CMaterialLambertian>(glm::vec3(0.8f));
     std::shared_ptr<cr::CMaterial>  mat_lambertBlue = std::make_shared<cr::CMaterialLambertian>(glm::vec3(0.2, 0.18, 0.87));
+    std::shared_ptr<cr::CMaterial>  mat_metalWhite = std::make_shared<cr::CMaterialMetal>(glm::vec3(1.0, 1.0, 1.0), 0);
     std::shared_ptr<cr::CMaterial>  mat_metalGold = std::make_shared<cr::CMaterialMetal>(glm::vec3(0.8, 0.6, 0.2), 0);
     std::shared_ptr<cr::CMaterial>  mat_metalBlue = std::make_shared<cr::CMaterialMetal>(glm::vec3(0.2, 0.3, 0.8), 0);
     std::shared_ptr<cr::CMaterial>  mat_metalRose = std::make_shared<cr::CMaterialMetal>(glm::vec3(0.8, 0.3, 0.2), 0.2);
-    std::shared_ptr<cr::CMaterial>  mat_glass = std::make_shared<cr::CMaterialGlass>(1.5, 0);
+    std::shared_ptr<cr::CMaterial>  mat_glass = std::make_shared<cr::CMaterialGlass>(1.9, 0);
 
     cr::CHittableList   world;
 
 #if 1   // Use Obj
-    cr::CHittableMesh   bunny(glm::vec3(0, 0, 0), mat_lambertWhite);
-    bunny.Load("bunny.obj");
-    world.Add(std::make_shared<cr::CHittableMesh>(bunny));
+    auto croissant = std::make_shared<cr::CHittableMesh>(glm::vec3(0, 0, 0), mat_lambertBrown);
+    croissant->Load("Model/Croissants_obj/Croissant.obj");
+    world.Add(croissant);
 #else
     world.Add(std::make_shared<cr::CHittableSphere>(cr::CHittableSphere(glm::vec3(0, 0, 0), 0.1, mat_lambertWhite)));
 #endif
-    world.Add(std::make_shared<cr::CHittableSphere>(cr::CHittableSphere(glm::vec3(0.2, 0, 0), 0.1, mat_metalRose)));
-    world.Add(std::make_shared<cr::CHittableSphere>(cr::CHittableSphere(glm::vec3(-0.2, 0, 0), 0.1, mat_metalBlue)));
-    world.Add(std::make_shared<cr::CHittableSphere>(cr::CHittableSphere(glm::vec3(0, -5.075, 0.5), 5, mat_lambertWhiteGray)));
+    world.Add(std::make_shared<cr::CHittableSphere>(cr::CHittableSphere(glm::vec3(0.1, 0.097, 0.3), 0.15, mat_lambertWhite)));
+    world.Add(std::make_shared<cr::CHittableSphere>(cr::CHittableSphere(glm::vec3(0.35, 0.07, 0.18), 0.12, mat_metalRose)));
+    world.Add(std::make_shared<cr::CHittableSphere>(cr::CHittableSphere(glm::vec3(-0.3, 0.05, 0), 0.1, mat_metalWhite)));
+    world.Add(std::make_shared<cr::CHittableSphere>(cr::CHittableSphere(glm::vec3(0.18, 0.025, -0.15), 0.05, mat_glass)));
+    world.Add(std::make_shared<cr::CHittableSphere>(cr::CHittableSphere(glm::vec3(-0.155, 0.06, 0.23), 0.11, mat_metalBlue)));
+    world.Add(std::make_shared<cr::CHittableSphere>(cr::CHittableSphere(glm::vec3(0, -10.05, 0), 10, mat_lambertWhite)));
+
+    world.BuildBVHTree();
+
+    // Render loop
+    printf("[Render] Start rendering...\n");
+    fflush(stdout);
 
     for (size_t w = 0; w < render_w; w++) {
         for (size_t h = 0; h < render_h; h++) {

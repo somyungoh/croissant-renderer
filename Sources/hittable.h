@@ -2,11 +2,15 @@
 
 #include "common.h"
 #include "ray.h"
+#include "aabb.h"
 
 _CR_NAMESPACE_BEGIN
 //----------------------------------------------------
 
 class CMaterial;
+class CHittableList;
+
+//----------------------------------------------------
 
 struct SHitRec
 {
@@ -29,6 +33,10 @@ class IHittable
 {
 public:
     virtual bool    Hit(const CRay &ray, float t_min, float t_max, SHitRec &hitRec) const = 0;
+
+public:
+    std::shared_ptr<CMaterial>  m_material;
+    CAABB                       m_aabb;
 };
 
 //----------------------------------------------------
@@ -41,11 +49,23 @@ public:
     virtual bool    Hit(const CRay &ray, float t_min, float t_max, SHitRec &hitRec) const override;
 
 public:
-    glm::vec3                   m_origin;
-    float                       m_radius;
-    std::shared_ptr<CMaterial>  m_material;
+    glm::vec3   m_origin;
+    float       m_radius;
 };
 
+//----------------------------------------------------
+
+class CHittableTriangle : public IHittable
+{
+public:
+    CHittableTriangle(const glm::vec3 &v0, const glm::vec3 &v1, const glm::vec3 &v2, const std::shared_ptr<CMaterial> &material);
+
+    virtual bool    Hit(const CRay &ray, float t_min, float t_max, SHitRec &hitRec) const override;
+
+public:
+    glm::vec3   m_v0, m_v1, m_v2;
+    glm::vec3   m_n;
+};
 
 //----------------------------------------------------
 
@@ -58,19 +78,15 @@ public:
     bool            Load(const char* file);
 
 public:
-    glm::vec3                   m_origin;
-    std::shared_ptr<CMaterial>  m_material;
+    glm::vec3                       m_origin;
 
 private:
     // mesh data
-    std::vector<glm::vec3>      m_vertices;
-    std::vector<uint32_t>       m_indices;
+    std::vector<glm::vec3>          m_vertices;
+    std::vector<uint32_t>           m_indices;
+    std::shared_ptr<CHittableList>  m_triangles;
 
-    // trianlge data (precompute purpose)
-    std::vector<glm::vec3>      m_edges;
-    std::vector<glm::vec3>      m_normals;
-
-    bool                        m_isMeshLoaded;
+    bool                            m_isMeshLoaded;
 };
 
 //----------------------------------------------------

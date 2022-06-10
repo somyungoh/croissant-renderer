@@ -2,141 +2,26 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb/stb_image_write.h"
 
-#include "ray.h"
-#include "material.h"
-#include "hittable_list.h"
-#include "camera.h"
-
-#include <chrono>
-
-const int render_w = 800;
-const int render_h = 600;
-
-const int nSamples = 16;
-const int nSamplesW = glm::sqrt(nSamples);
-const float nSamplesOffset = 0.5f / nSamplesW;
-
-const int max_depth = 10;
-
-float *pixmap = new float[render_w * render_h * 3];
+#include "renderer.h"
 
 //----------------------------------------------------
 
-glm::vec3 raycast(const cr::CRay &ray, const cr::CHittableList &world, int depth)
-{
-    // max-depth reached
-    if (depth <= 0) {
-        return glm::vec3(0);
-    }
-
-    cr::SHitRec     hitRec;
-    if (world.Hit(ray, 0.00001f, _INFINITY, hitRec))
-    {
-        // bounced rays
-        cr::CRay    scatteredRay;
-        glm::vec3   attenuation;
-        if (hitRec.p_material->Scatter(ray, hitRec, attenuation, scatteredRay))
-            return attenuation * raycast(scatteredRay, world, depth - 1);
-        return glm::vec3(0);
-    }
-
-    // coloring
-    float   t = 0.5f * (ray.m_dir.y + 1.0f);
-    return glm::vec3(1.0) * (1.0f - t) + glm::vec3(0.5, 0.7, 1.0) * t;
-}
+float* pixmap = nullptr;
+cr::SRenderSetting  renderSetting;
 
 //----------------------------------------------------
 
-void render()
-{
-    // Timer
-    auto            begin = std::chrono::steady_clock::now();
-
-    // Camera
-    float           aspectRatio = (float)render_w / render_h;
-    cr::CCamera     camera = cr::CCamera(45.f, aspectRatio);
-    camera.SetPos(glm::vec3(0, 0.65, -1));
-    camera.LookAt(glm::vec3(0, 0, 0));
-
-    // Scene
-    std::shared_ptr<cr::CMaterial>  mat_labmbertGreen = std::make_shared<cr::CMaterialLambertian>(glm::vec3(0.15, 0.6, 0.09));
-    std::shared_ptr<cr::CMaterial>  mat_lambertWhite = std::make_shared<cr::CMaterialLambertian>(glm::vec3(1.0f));
-    std::shared_ptr<cr::CMaterial>  mat_lambertBrown = std::make_shared<cr::CMaterialLambertian>(glm::vec3(0.92f, 0.59f, 0.17f));
-    std::shared_ptr<cr::CMaterial>  mat_lambertWhiteGray = std::make_shared<cr::CMaterialLambertian>(glm::vec3(0.8f));
-    std::shared_ptr<cr::CMaterial>  mat_lambertBlue = std::make_shared<cr::CMaterialLambertian>(glm::vec3(0.2, 0.18, 0.87));
-    std::shared_ptr<cr::CMaterial>  mat_metalWhite = std::make_shared<cr::CMaterialMetal>(glm::vec3(1.0, 1.0, 1.0), 0);
-    std::shared_ptr<cr::CMaterial>  mat_metalGold = std::make_shared<cr::CMaterialMetal>(glm::vec3(0.8, 0.6, 0.2), 0);
-    std::shared_ptr<cr::CMaterial>  mat_metalBlue = std::make_shared<cr::CMaterialMetal>(glm::vec3(0.2, 0.3, 0.8), 0);
-    std::shared_ptr<cr::CMaterial>  mat_metalRose = std::make_shared<cr::CMaterialMetal>(glm::vec3(0.8, 0.3, 0.2), 0.2);
-    std::shared_ptr<cr::CMaterial>  mat_glass = std::make_shared<cr::CMaterialGlass>(1.9, 0);
-
-    cr::CHittableList   world;
-
-#if 1   // Use Obj
-    auto croissant = std::make_shared<cr::CHittableMesh>(glm::vec3(0, 0, 0), mat_lambertBrown);
-    croissant->Load("Model/Croissants_obj/Croissant.obj");
-    world.Add(croissant);
-#else
-    world.Add(std::make_shared<cr::CHittableSphere>(cr::CHittableSphere(glm::vec3(0, 0, 0), 0.1, mat_lambertWhite)));
-#endif
-    world.Add(std::make_shared<cr::CHittableSphere>(cr::CHittableSphere(glm::vec3(0.1, 0.097, 0.3), 0.15, mat_lambertWhite)));
-    world.Add(std::make_shared<cr::CHittableSphere>(cr::CHittableSphere(glm::vec3(0.35, 0.07, 0.18), 0.12, mat_metalRose)));
-    world.Add(std::make_shared<cr::CHittableSphere>(cr::CHittableSphere(glm::vec3(-0.3, 0.05, 0), 0.1, mat_metalWhite)));
-    world.Add(std::make_shared<cr::CHittableSphere>(cr::CHittableSphere(glm::vec3(0.18, 0.025, -0.15), 0.05, mat_glass)));
-    world.Add(std::make_shared<cr::CHittableSphere>(cr::CHittableSphere(glm::vec3(-0.155, 0.06, 0.23), 0.11, mat_metalBlue)));
-    world.Add(std::make_shared<cr::CHittableSphere>(cr::CHittableSphere(glm::vec3(0, -10.05, 0), 10, mat_lambertWhite)));
-
-    world.BuildBVHTree();
-
-    // Render loop
-    printf("[Render] Start rendering...\n");
-    fflush(stdout);
-
-    for (size_t w = 0; w < render_w; w++) {
-        for (size_t h = 0; h < render_h; h++) {
-            for (size_t s = 0; s < nSamples; s++)
-            {
-                int     si = s % nSamplesW;
-                int     sj = s / nSamplesW;
-                float   u = (w + (float)si / nSamplesW + nSamplesOffset) / render_w;
-                float   v = (h + (float)sj / nSamplesW + nSamplesOffset) / render_h;
-                cr::CRay    ray = camera.GetRay(u, v);
-                glm::vec3 color = raycast(ray, world, max_depth);
-
-                // AA correction
-                color /= nSamples;
-
-                // gamma correction
-                float scale = 1.0f / nSamples;
-                color = glm::sqrt(color * scale);
-
-                pixmap[(h * render_w + w) * 3 + 0] += color.r;
-                pixmap[(h * render_w + w) * 3 + 1] += color.g;
-                pixmap[(h * render_w + w) * 3 + 2] += color.b;
-            }
-        }
-    }
-
-    // elapsed time
-    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-    printf("[Render] Done.\n");
-    printf("[Render] Elpased: %.3fs.\n", elapsed / 1000.f);
-}
-
-//----------------------------------------------------
-
-void saveJpeg()
+void saveJpeg(u_int32_t img_w, u_int32_t img_h)
 {
     const char* filename = "MyRender.jpg";
 
     // remap pixmap to 8 bits
-    unsigned char pixmap8bits[render_w * render_h * 3];
-    for (size_t i = 0; i < render_w * render_h * 3; ++i)
+    unsigned char pixmap8bits[img_w * img_h * 3];
+    for (size_t i = 0; i < img_w * img_h * 3; ++i)
         pixmap8bits[i] = pixmap[i] * 255.f;
 
     stbi_flip_vertically_on_write(true);
-    int success = stbi_write_jpg(filename, render_w, render_h, 3, pixmap8bits, 100);
+    int success = stbi_write_jpg(filename, img_w, img_h, 3, pixmap8bits, 100);
 
     if (success)
         std::cout << "Image saved: " << filename << std::endl;
@@ -149,7 +34,7 @@ void saveJpeg()
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     if (key == GLFW_KEY_S && action == GLFW_PRESS)
-        saveJpeg();
+        saveJpeg(renderSetting.render_w, renderSetting.render_h);
 }
 
 //----------------------------------------------------
@@ -162,7 +47,7 @@ int main(void)
         return -1;
 
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-    window = glfwCreateWindow(render_w, render_h, "Croissant-Renderer (beta)", NULL, NULL);
+    window = glfwCreateWindow(800, 600, "Croissant-Renderer (beta)", NULL, NULL);
 
     if (!window)
     {
@@ -173,7 +58,18 @@ int main(void)
     glfwSetKeyCallback(window, keyCallback);
     glfwMakeContextCurrent(window);
 
-    render();
+    // init renderer
+    cr::CRenderer       renderer;
+    renderSetting.render_w = 800;
+    renderSetting.render_h = 600;
+    renderSetting.nSamples = 9;
+    renderSetting.nMaxDepth = 10;
+    renderSetting.nSamplesW = glm::sqrt(renderSetting.nSamples);
+    renderSetting.nSamplesOffset = 0.5f / renderSetting.nSamplesW;
+
+    renderer.SetRenderSetting(renderSetting);
+    renderer.InitScene();
+    // renderer.FullRender();
 
     while (!glfwWindowShouldClose(window))
     {
@@ -189,10 +85,14 @@ int main(void)
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
 
+        if (!renderer.IsFinished())
+            renderer.ProgressiveRender();
+        renderer.GetLastRender(pixmap);
+
         glClear(GL_COLOR_BUFFER_BIT);
         glRasterPos2i(0, 0);
-        glPixelZoom(fbuffer_w / render_w, fbuffer_h / render_h);    // because (window size != framebuffer) size can happen
-        glDrawPixels(render_w, render_h, GL_RGB, GL_FLOAT, pixmap);
+        glPixelZoom(fbuffer_w / renderSetting.render_w, fbuffer_h / renderSetting.render_h);    // because (window size != framebuffer) size can happen
+        glDrawPixels(renderSetting.render_w, renderSetting.render_h, GL_RGB, GL_FLOAT, pixmap);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

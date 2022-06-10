@@ -98,25 +98,25 @@ void    CBVHAccel::Clear()
 
 bool   CBVHAccel:: _BuildTree()
 {
-    if (hittables.size() == 0)
+    if (m_hittables.size() == 0)
         return true;
 
     // BVH-Tree construction
     printf("[BVH] Start bvh-tree construction...\n");
 
     // 1. initialize primitive info
-    std::vector<SHittableInfo>     hittableInfo(hittables.size());
+    std::vector<SHittableInfo>     hittableInfo(m_hittables.size());
     for (size_t i = 0; i < hittableInfo.size(); i++)
     {
-        hittableInfo[i] = { i, hittables[i]->m_aabb };
+        hittableInfo[i] = { i, m_hittables[i]->m_aabb };
     };
 
     // 2. build BVH tree
     int     totalNodes = 0;
     std::vector<std::shared_ptr<IHittable>>     orderedHittables;
-    orderedHittables.reserve(hittables.size());
+    orderedHittables.reserve(m_hittables.size());
 
-    SBVHBuildNode   *root = _RecursiveBuild(hittableInfo, 0, hittables.size(), &totalNodes, orderedHittables);
+    SBVHBuildNode   *root = _RecursiveBuild(hittableInfo, 0, m_hittables.size(), &totalNodes, orderedHittables);
     m_hittables.swap(orderedHittables);
     hittableInfo.resize(0);
     

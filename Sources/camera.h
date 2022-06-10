@@ -9,6 +9,7 @@ _CR_NAMESPACE_BEGIN
 class CCamera
 {
 public:
+    CCamera() {};
     CCamera(float vFov, float aspectRatio)
     : m_vFov(vFov)
     , m_aspectRatio(aspectRatio)

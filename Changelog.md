@@ -1,6 +1,9 @@
 # Changelog
 
 ## v0.0.2
+- Added BVH-Tree acceleration
+- Added Triangle mesh hittable
+- First minimum progressive rendering
 
 ## v0.0.1
 (Released: May 26, 2022)

@@ -2,13 +2,16 @@
 
 #include "common.h"
 #include "ray.h"
+#include "texture.h"
+
+#include <memory>   // std::unique_ptr
 
 _CR_NAMESPACE_BEGIN
 //----------------------------------------------------
 
 struct SHitRec;
 
-class CMaterial
+class IMaterial
 {
 public:
     virtual bool    Scatter(const CRay &ray, const SHitRec &hitRec, glm::vec3 &attenuation, CRay &scattered) const = 0;
@@ -16,9 +19,10 @@ public:
 
 //----------------------------------------------------
 
-class CMaterialLambertian : public CMaterial
+class CMaterialLambertian : public IMaterial
 {
 public:
+    CMaterialLambertian(const glm::vec3& color);
     CMaterialLambertian(const glm::vec3 &color);
 
     virtual bool    Scatter(const CRay &ray, const SHitRec &hitRec, glm::vec3 &attenuation, CRay &scattered) const override;
@@ -29,7 +33,7 @@ public:
 
 //----------------------------------------------------
 
-class CMaterialMetal : public CMaterial
+class CMaterialMetal : public IMaterial
 {
 public:
     CMaterialMetal(const glm::vec3 &color, float glossiness);
@@ -43,7 +47,7 @@ public:
 
 //----------------------------------------------------
 
-class CMaterialGlass : public CMaterial
+class CMaterialGlass : public IMaterial
 {
 public:
     CMaterialGlass(float refrativeIndex, float glossiness);

@@ -6,7 +6,7 @@
 _CR_NAMESPACE_BEGIN
 //----------------------------------------------------
 
-CHittableSphere::CHittableSphere(const glm::vec3 &origin, float radius, const std::shared_ptr<CMaterial> &material)
+CHittableSphere::CHittableSphere(const glm::vec3 &origin, float radius, const std::shared_ptr<IMaterial> &material)
 : m_origin(origin)
 , m_radius(radius)
 {
@@ -42,7 +42,7 @@ bool    CHittableSphere::Hit(const CRay &ray, float t_min, float t_max, SHitRec 
 
 //----------------------------------------------------
 
-CHittableTriangle::CHittableTriangle(const glm::vec3 &v0, const glm::vec3 &v1, const glm::vec3 &v2, const std::shared_ptr<CMaterial> &material)
+CHittableTriangle::CHittableTriangle(const glm::vec3 &v0, const glm::vec3 &v1, const glm::vec3 &v2, const std::shared_ptr<IMaterial> &material)
 : m_v0(v0)
 , m_v1(v1)
 , m_v2(v2)
@@ -90,7 +90,7 @@ bool    CHittableTriangle::Hit(const CRay &ray, float t_min, float t_max, SHitRe
 
 //----------------------------------------------------
 
-CHittableMesh::CHittableMesh(const glm::vec3 &origin, const std::shared_ptr<CMaterial> &material)
+CHittableMesh::CHittableMesh(const glm::vec3 &origin, const std::shared_ptr<IMaterial> &material)
 : m_origin(origin)
 , m_triangles(std::make_shared<CHittableList>())
 , m_isMeshLoaded(false)

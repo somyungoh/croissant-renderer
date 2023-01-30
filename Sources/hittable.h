@@ -7,7 +7,7 @@
 _CR_NAMESPACE_BEGIN
 //----------------------------------------------------
 
-class CMaterial;
+class IMaterial;
 class CHittableList;
 
 //----------------------------------------------------
@@ -17,7 +17,7 @@ struct SHitRec
     glm::vec3   p;
     glm::vec3   n;
     float       t;
-    std::shared_ptr<CMaterial>  p_material;
+    std::shared_ptr<IMaterial>  p_material;
     bool        frontFace;
 
     void        setFaceNormal(const CRay &ray)
@@ -35,7 +35,7 @@ public:
     virtual bool    Hit(const CRay &ray, float t_min, float t_max, SHitRec &hitRec) const = 0;
 
 public:
-    std::shared_ptr<CMaterial>  m_material;
+    std::shared_ptr<IMaterial>  m_material;
     CAABB                       m_aabb;
 };
 
@@ -44,7 +44,7 @@ public:
 class CHittableSphere : public IHittable
 {
 public:
-    CHittableSphere(const glm::vec3 &origin, float radius, const std::shared_ptr<CMaterial> &material);
+    CHittableSphere(const glm::vec3 &origin, float radius, const std::shared_ptr<IMaterial> &material);
 
     virtual bool    Hit(const CRay &ray, float t_min, float t_max, SHitRec &hitRec) const override;
 
@@ -58,7 +58,7 @@ public:
 class CHittableTriangle : public IHittable
 {
 public:
-    CHittableTriangle(const glm::vec3 &v0, const glm::vec3 &v1, const glm::vec3 &v2, const std::shared_ptr<CMaterial> &material);
+    CHittableTriangle(const glm::vec3 &v0, const glm::vec3 &v1, const glm::vec3 &v2, const std::shared_ptr<IMaterial> &material);
 
     virtual bool    Hit(const CRay &ray, float t_min, float t_max, SHitRec &hitRec) const override;
 
@@ -72,7 +72,7 @@ public:
 class CHittableMesh : public IHittable
 {
 public:
-    CHittableMesh(const glm::vec3 &origin, const std::shared_ptr<CMaterial> &material);
+    CHittableMesh(const glm::vec3 &origin, const std::shared_ptr<IMaterial> &material);
 
     virtual bool    Hit(const CRay &ray, float t_min, float t_max, SHitRec &hitRec) const override;
     bool            Load(const char* file);

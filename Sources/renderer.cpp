@@ -143,6 +143,8 @@ void    CRenderer::InitScene()
     m_camera->LookAt(glm::vec3(0, 0, 0));
 
     // Scene
+    std::unique_ptr<cr::ITexture>   tex_checker = std::make_unique<cr::CTextureChecker>(glm::vec3(0.8), glm::vec3(0.1));
+    std::shared_ptr<cr::IMaterial>  mat_labmbertChecker = std::make_shared<cr::CMaterialLambertian>(tex_checker);
 
     std::shared_ptr<cr::IMaterial>  mat_labmbertGreen = std::make_shared<cr::CMaterialLambertian>(glm::vec3(0.15, 0.6, 0.09));
     std::shared_ptr<cr::IMaterial>  mat_lambertWhite = std::make_shared<cr::CMaterialLambertian>(glm::vec3(1.0f));
@@ -168,7 +170,7 @@ void    CRenderer::InitScene()
     m_scene->Add(std::make_shared<cr::CHittableSphere>(cr::CHittableSphere(glm::vec3(-0.3, 0.05, 0), 0.1, mat_metalWhite)));
     m_scene->Add(std::make_shared<cr::CHittableSphere>(cr::CHittableSphere(glm::vec3(0.18, 0.025, -0.15), 0.05, mat_glass)));
     m_scene->Add(std::make_shared<cr::CHittableSphere>(cr::CHittableSphere(glm::vec3(-0.155, 0.06, 0.23), 0.11, mat_metalBlue)));
-    m_scene->Add(std::make_shared<cr::CHittableSphere>(cr::CHittableSphere(glm::vec3(0, -10.05, 0), 10, mat_lambertWhite)));
+    m_scene->Add(std::make_shared<cr::CHittableSphere>(cr::CHittableSphere(glm::vec3(0, -10.05, 0), 10, mat_labmbertChecker)));
 
     m_scene->BuildBVHTree();
 }

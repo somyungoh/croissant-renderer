@@ -6,8 +6,15 @@
 _CR_NAMESPACE_BEGIN
 //----------------------------------------------------
 
-CMaterialLambertian::CMaterialLambertian(const glm::vec3 &color)
-: m_albedo(color)
+CMaterialLambertian::CMaterialLambertian(const glm::vec3& color)
+: m_albedo(std::make_unique<CTextureConstant>(color))
+{
+}
+
+//----------------------------------------------------
+
+CMaterialLambertian::CMaterialLambertian(std::unique_ptr<ITexture>& texture)
+: m_albedo(std::move(texture))
 {
 }
 
@@ -16,7 +23,7 @@ CMaterialLambertian::CMaterialLambertian(const glm::vec3 &color)
 bool    CMaterialLambertian::Scatter(const CRay &ray, const SHitRec &hitRec, glm::vec3 &attenuation, CRay &scattered) const
 {
     cr::CRay    diffuseRay = cr::CRay(hitRec.p, hitRec.n + glm::vec3(glm::sphericalRand(1.0)));
-    attenuation = m_albedo;
+    attenuation = m_albedo->Eval(0, 0, hitRec.p);
     scattered = diffuseRay;
 
     // corner case: random generated vector has same direction to the normal

@@ -23,12 +23,12 @@ class CMaterialLambertian : public IMaterial
 {
 public:
     CMaterialLambertian(const glm::vec3& color);
-    CMaterialLambertian(const glm::vec3 &color);
+    CMaterialLambertian(std::unique_ptr<ITexture>& texture);
 
     virtual bool    Scatter(const CRay &ray, const SHitRec &hitRec, glm::vec3 &attenuation, CRay &scattered) const override;
 
 public:
-    glm::vec3   m_albedo;
+    std::unique_ptr<ITexture>   m_albedo;
 };
 
 //----------------------------------------------------
